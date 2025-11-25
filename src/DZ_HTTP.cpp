@@ -49,12 +49,12 @@ void DZ_HTTP::send(Method http_method, String path_url, std::vector<std::pair<St
     case DZ_METHOD_PUT:   http_code = http_req.PUT(http_body);    break;
   }
   if (http_code > 0) {
-    Serial.printf("[%s] %s - code: %d\n", methodToString(http_method).c_str(), full_url.c_str(), http_code);
+    Serial.printf("[DZ_HTTP][%s] %s - code: %d\n", methodToString(http_method).c_str(), full_url.c_str(), http_code);
     Serial.println(http_req.getString());
   } else if (http_code == 0) {
-    Serial.printf("Method not found! Code: %d\n", http_code);
+    Serial.printf("[DZ_HTTP] Method not found! Code: %d\n", http_code);
   } else {
-    Serial.printf("Request failed! Code: %d\n", http_code);
+    Serial.printf("[DZ_HTTP] Request failed! Code: %d\n", http_code);
   }
   http_req.end();
   clearString(full_url);
@@ -92,6 +92,8 @@ String DZ_HTTP::send(Method http_method, String path_url, std::vector<std::pair<
 
   String res = "";
   if (code > 0) res = http_req.getString();
+  else if (http_code == 0) res = "[DZ_HTTP] Method not found! Code: " + http_code;
+  else res = "[DZ_HTTP] Request failed! Code: " + http_code;
   http_req.end();
   clearString(full_url);
   return res;
