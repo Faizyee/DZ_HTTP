@@ -21,7 +21,7 @@ void setup() {
   WiFi.begin("SSID", "PASS");
   while(WiFi.status() != WL_CONNECTED);
 
-  String r1 = http.sendResponse(DZ_HTTP::DZ_METHOD_GET, "/ping");
+  String r1 = http.send(DZ_HTTP::DZ_METHOD_GET, "/ping");
   Serial.println(r1);
 
   DZ_HTTP::DZ_HEADER headers = {
