@@ -2,9 +2,17 @@
 #define DZ_HTTP_H
 
 #include <Arduino.h>
-#include <WiFi.h>
+
+#if defined(ESP8266)
+  #include <ESP8266WiFi.h>
+  #include <ESP8266HTTPClient.h>
+#elif defined(ESP32)
+  #include <WiFi.h>
+  #include <HTTPClient.h>
+#endif
+
 #include <WiFiClientSecure.h>
-#include <HTTPClient.h>
+#include <WiFiClient.h>
 #include <vector>
 #include <utility>
 
@@ -21,10 +29,10 @@ class DZ_HTTP {
     void send(Method http_method, String path_url, std::vector<std::pair<String, String>> http_headers);
     void send(Method http_method, String path_url, String http_body);
     void send(Method http_method, String path_url, std::vector<std::pair<String, String>> http_headers, String http_body);
-    String send(Method http_method, String path_url);
-    String send(Method http_method, String path_url, std::vector<std::pair<String, String>> http_headers);
-    String send(Method http_method, String path_url, String http_body);
-    String send(Method http_method, String path_url, std::vector<std::pair<String, String>> http_headers, String http_body);
+    String send_with_response(Method http_method, String path_url);
+    String send_with_response(Method http_method, String path_url, std::vector<std::pair<String, String>> http_headers);
+    String send_with_response(Method http_method, String path_url, String http_body);
+    String send_with_response(Method http_method, String path_url, std::vector<std::pair<String, String>> http_headers, String http_body);
 
   private:
     String base_url;

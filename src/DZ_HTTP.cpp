@@ -33,16 +33,20 @@ void DZ_HTTP::send(Method http_method, String path_url, String http_body) {
 
 void DZ_HTTP::send(Method http_method, String path_url, std::vector<std::pair<String, String>> http_headers, String http_body) {
   HTTPClient http_req;
-  WiFiClientSecure client;
-  client.setInsecure();
   String full_url = base_url + path_url;
 
-  if (full_url.startsWith("https://")) http_req.begin(client, full_url);
-  else http_req.begin(full_url);
+  if (full_url.startsWith("https://")) {
+    WiFiClientSecure client;
+    client.setInsecure();
+  	http_req.begin(client, full_url);
+  } else {
+    WiFiClient client;	
+    http_req.begin(client, full_url);
+  }
 
   for (auto& h : http_headers) http_req.addHeader(h.first, h.second);
 
-  int code = 0;
+  int http_code = 0;
   switch (http_method) {
     case DZ_METHOD_GET:   http_code = http_req.GET();             break;
     case DZ_METHOD_POST:  http_code = http_req.POST(http_body);   break;
@@ -50,7 +54,8 @@ void DZ_HTTP::send(Method http_method, String path_url, std::vector<std::pair<St
   }
   if (http_code > 0) {
     Serial.printf("[DZ_HTTP][%s] %s - code: %d\n", methodToString(http_method).c_str(), full_url.c_str(), http_code);
-    Serial.println(http_req.getString());
+    Serial.printf("[DZ_HTTP] Request body: %s\n", http_body.c_str());
+    Serial.printf("[DZ_HTTP] Response: %s\n", http_req.getString().c_str());
   } else if (http_code == 0) {
     Serial.printf("[DZ_HTTP] Method not found! Code: %d\n", http_code);
   } else {
@@ -60,38 +65,42 @@ void DZ_HTTP::send(Method http_method, String path_url, std::vector<std::pair<St
   clearString(full_url);
 }
 
-String DZ_HTTP::send(Method http_method, String path_url) {
-  return send(http_method, path_url, std::vector<std::pair<String, String>>(), "");
+String DZ_HTTP::send_with_response(Method http_method, String path_url) {
+  return send_with_response(http_method, path_url, std::vector<std::pair<String, String>>(), "");
 }
 
-String DZ_HTTP::send(Method http_method, String path_url, std::vector<std::pair<String, String>> http_headers) {
-  return send(http_method, path_url, http_headers, "");
+String DZ_HTTP::send_with_response(Method http_method, String path_url, std::vector<std::pair<String, String>> http_headers) {
+  return send_with_response(http_method, path_url, http_headers, "");
 }
 
-String DZ_HTTP::send(Method http_method, String path_url, String http_body) {
-  return send(http_method, path_url, std::vector<std::pair<String, String>>(), http_body);
+String DZ_HTTP::send_with_response(Method http_method, String path_url, String http_body) {
+  return send_with_response(http_method, path_url, std::vector<std::pair<String, String>>(), http_body);
 }
 
-String DZ_HTTP::send(Method http_method, String path_url, std::vector<std::pair<String, String>> http_headers, String http_body) {
+String DZ_HTTP::send_with_response(Method http_method, String path_url, std::vector<std::pair<String, String>> http_headers, String http_body) {
   HTTPClient http_req;
-  WiFiClientSecure client;
-  client.setInsecure();
   String full_url = base_url + path_url;
 
-  if (full_url.startsWith("https://")) http_req.begin(client, full_url);
-  else http_req.begin(full_url);
+  if (full_url.startsWith("https://")) {
+    WiFiClientSecure client;
+    client.setInsecure();
+  	http_req.begin(client, full_url);
+  } else {
+    WiFiClient client;	
+    http_req.begin(client, full_url);
+  }
 
   for (auto& h : http_headers) http_req.addHeader(h.first, h.second);
 
-  int code = 0;
+  int http_code = 0;
   switch (http_method) {
-    case DZ_METHOD_GET:   code = http_req.GET();           break;
-    case DZ_METHOD_POST:  code = http_req.POST(http_body); break;
-    case DZ_METHOD_PUT:   code = http_req.PUT(http_body);  break;
+    case DZ_METHOD_GET:   http_code = http_req.GET();           break;
+    case DZ_METHOD_POST:  http_code = http_req.POST(http_body); break;
+    case DZ_METHOD_PUT:   http_code = http_req.PUT(http_body);  break;
   }
 
   String res = "";
-  if (code > 0) res = http_req.getString();
+  if (http_code > 0) res = http_req.getString();
   else if (http_code == 0) res = "[DZ_HTTP] Method not found! Code: " + http_code;
   else res = "[DZ_HTTP] Request failed! Code: " + http_code;
   http_req.end();
